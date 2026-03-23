@@ -6,7 +6,7 @@ It is designed to work with user-supplied time-series data.
 ## What it does
 
 Analysts may be interested in visualizing historical data alongside indicators, event markers, 
-and additional time-series data generated from backtests or analysis (e.g. using pandas).  
+and additional time-series data generated from backtests or analysis (e.g. using pandas). 
 This is the primary use case the application is designed for.
 
 The application does not currently include advanced charting or technical analysis tools 
@@ -45,8 +45,10 @@ There's an example CSV [here](public/data/BTCUSDT_4-11-2026_to_6-11-2026_5m.csv)
    Open your browser and navigate to: ```http://localhost:3000/chart```
 
 ## List of supported series (Indicators)
+Asterisks (*) indicate required columns.
 | Indicator/Group                        | Series    |
 |----------------------------------------|-----------|
+| Datetime                               | *time     |
 | Candlestick                            | open      |
 |                                        | high      |
 |                                        | low       |
@@ -64,3 +66,4 @@ There's an example CSV [here](public/data/BTCUSDT_4-11-2026_to_6-11-2026_5m.csv)
 | Kaufman Efficiency Ratio               | er        |
 | Average True Range (ATR)               | atr       |
 | Kaufman Adaptive Moving Average (KAMA) | kama      |
+

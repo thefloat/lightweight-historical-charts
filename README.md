@@ -15,12 +15,13 @@ The application does not currently include advanced charting or technical analys
 It does not perform calculations (e.g. indicator computation). 
 Instead, it operates entirely on user-provided data--you are expected to supply a CSV 
 containing time-series data that conforms to the expected [schema](#list-of-supported-series-indicators).
+There's an example CSV [here] (public/data/BTCUSDT_4-11-2026_to_6-11-2026_5m.csv)
 
 ## Features
 * Show/hide a series
 
 ## Prerequisites
-- Node.js (includes npm): https://nodejs.org/
+- Node.js: https://nodejs.org/
 
 ## Dependencies
 - lightweight-charts: https://github.com/tradingview/lightweight-charts
@@ -44,32 +45,22 @@ containing time-series data that conforms to the expected [schema](#list-of-supp
    Open your browser and navigate to: ```http://localhost:3000/chart```
 
 ## List of supported series (Indicators)
-| Indicator/Group                        | Series      |
-|----------------------------------------|-------------|
-| Candlestick                            | * open      |
-|                                        | * high      |
-|                                        | * low       |
-|                                        | * close     |
-| Volume                                 | * volume    |
-| Bollinger Bands                        | * bb_upper  |
-|                                        | * bb_middle |
-|                                        | * bb_lower  |
-| Donchian Channel                       | * dc_upper  |
-|                                        | * dc_middle |
-|                                        | * dc_lower  |
-| adx                                    | * adx       |
-|                                        | * plusDi    |
-|                                        | * minusDi   |
-| Kaufman Efficiency Ratio               | * er        |
-| Average True Range (ATR)               | * atr       |
-| Kaufman Adaptive Moving Average (KAMA) | * kama      |
-
-
-
-## Test HTML Table
-<table>
-  <tr><th>Col 1</th><th>Col 2</th></tr>
-  <tr><td>Value</td><td>Value</td></tr>
-</table>
-
-
+| Indicator/Group                        | Series    |
+|----------------------------------------|-----------|
+| Candlestick                            | open      |
+|                                        | high      |
+|                                        | low       |
+|                                        | close     |
+| Volume                                 | volume    |
+| Bollinger Bands                        | bb_upper  |
+|                                        | bb_middle |
+|                                        | bb_lower  |
+| Donchian Channel                       | dc_upper  |
+|                                        | dc_middle |
+|                                        | dc_lower  |
+| adx                                    | adx       |
+|                                        | plusDi    |
+|                                        | minusDi   |
+| Kaufman Efficiency Ratio               | er        |
+| Average True Range (ATR)               | atr       |
+| Kaufman Adaptive Moving Average (KAMA) | kama      |

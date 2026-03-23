@@ -15,7 +15,7 @@ The application does not currently include advanced charting or technical analys
 It does not perform calculations (e.g. indicator computation). 
 Instead, it operates entirely on user-provided data--you are expected to supply a CSV 
 containing time-series data that conforms to the expected [schema](#list-of-supported-series-indicators).
-There's an example CSV [here] (public/data/BTCUSDT_4-11-2026_to_6-11-2026_5m.csv)
+There's an example CSV [here](public/data/BTCUSDT_4-11-2026_to_6-11-2026_5m.csv)
 
 ## Features
 * Show/hide a series

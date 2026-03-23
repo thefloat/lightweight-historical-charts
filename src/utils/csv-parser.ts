@@ -1,0 +1,258 @@
+/* 
+Copyright 2023 opolopo eniyan
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. 
+*/
+
+
+import type { UTCTimestamp, WhitespaceData, LineData, HistogramData, CandlestickData } from 'lightweight-charts';
+
+/**
+ * Represents a single row parsed from the CSV, where keys are header names and values are the corresponding cell values.
+ * All values are initially strings before further processing.
+ */
+interface CsvRow {
+  [key: string]: string;
+}
+
+export interface ChartEvents {
+  time: UTCTimestamp
+  events: string[]
+}
+
+/**
+ * Parses CSV text data into structured formats for lightweight charts data (like candlestick or volume data).
+ * Handles CSV parsing, data column validation ('time', 'close', 'volume' etc.), and normalization of time values to UTCTimestamp.
+ */
+class CSVParser {
+  /**
+   * The parsed CSV data, stored as an array of objects.
+   * Each object represents a row, with keys corresponding to header columns.
+   */
+  private data: CsvRow[];
+  private headers: string[];
+
+  /**
+   * Creates an instance of CsvParser.
+   * @param csvText - The CSV text to parse.
+   */
+  constructor(csvText: string) {
+    const result = this._parseCSV(csvText);
+    this.data = result.data;
+    this.headers = result.headers;
+  }
+
+  /**
+   * Parses CSV text into an array of CsvRow objects.
+   * Assumes the first row is the header.
+   * @param csvText - The CSV data as a string.
+   * @returns An array of objects representing the CSV rows.
+   * @throws {Error} If CSV text is empty or header is missing.
+   * @private
+   */
+  private _parseCSV(csvText: string): { data: CsvRow[], headers: string[] } {
+    if (!csvText || csvText.trim() === '') {
+      throw new Error("CSV text cannot be empty.");
+    }
+    const rows = csvText.trim().split('\n');
+    if (rows.length < 2) {
+      throw new Error("CSV must contain a header row and at least one data row.");
+    }
+
+    const headers: string[] = rows[0].split(',').map(h => h.trim());
+    const data: CsvRow[] = [];
+
+    for (let i = 1; i < rows.length; i++) {
+      const values: string[] = rows[i].split(',').map(v => v.trim());
+      if (values.length === headers.length) {
+        const entry: CsvRow = {};
+        headers.forEach((key, index) => {
+          entry[key] = values[index];
+        });
+        data.push(entry);
+      } else {
+        console.warn(`Skipping row ${i + 1}: Incorrect number of columns. Expected ${headers.length}, got ${values.length}.`);
+      }
+    }
+    return { data, headers };
+  }
+
+  /**
+   * Normalizes a time value from a string to a UTCTimestamp (Unix epoch in seconds).
+   * Handles both date strings (parsable by Date.parse) and numeric timestamps in seconds.
+   * @param timeValue - The time value string from the CSV. Expected to be either:
+   * - A date string (e.g., "YYYY-MM-DDTHH:mm:ssZ", "YYYY-MM-DD")
+   * - A Unix timestamp in seconds (as a string)
+   * @returns The a UTCTimestamp (in seconds) or NaN if parsing fails.
+   * @private
+   */
+  private _normalizeTime(timeValue: string): UTCTimestamp {
+    // Try parsing as a date string first
+    const date = Date.parse(timeValue);
+    if (!isNaN(date)) {
+      return (date / 1000) as UTCTimestamp; // Convert milliseconds to seconds
+    }
+
+    // If not a date string, try parsing as a numeric timestamp (assumed to be in seconds)
+    const numericTimestamp = parseFloat(timeValue);
+    if (!isNaN(numericTimestamp) && isFinite(numericTimestamp)) {
+      return numericTimestamp as UTCTimestamp;
+    }
+
+    console.warn(`Could not parse time value: "${timeValue}" as date string or numeric timestamp (seconds).`);
+    return NaN as UTCTimestamp;
+  }
+
+  /**
+   * Validates if all required columns are present in the header.
+   * @param header - The header columns from the CSV.
+   * @param requiredColumns - The columns required for the specific data type.
+   * @throws {Error} If any required column is missing.
+   * @private
+   */
+  private _validateColumns(requiredColumns: string[]): void {
+    // Use lower case only during comparison. Leave headers unmodified.
+    const lowerCaseheaders = this.headers.map(header => header.toLowerCase());
+    const missing = requiredColumns.filter(col => !lowerCaseheaders.includes(col.toLowerCase()));
+    
+    if (missing.length > 0) {
+      throw new Error(`Missing required columns: ${missing.join(', ')}`);
+    }
+  }
+
+  /**
+   * Retrieves the parsed CSV data as an array of CsvRow objects.
+   * @returns {CsvRow[]} An array containing the parsed CSV data rows
+   */
+  getData(): CsvRow[] {
+    return this.data;
+  }
+  
+  /**
+   * Returns an array of header strings from the CSV data.
+   * @returns {string[]} An array containing the column headers of the CSV data
+   */
+  getHeaders(): string[] {
+    return this.headers;
+  }
+
+  /**
+   * Parses CSV data into an array of TradeEvent objects.
+   * Required columns: 'time', 'event'.
+   * Time is normalized to a UTCTimestamp (seconds since epoch).
+   * 
+   * @param requiredColumn - The name of the column to map to the event field in TradeEvent
+   * @returns Array of TradeEvent objects containing time and event data
+   * @throws {Error} If no data is available to parse or if required columns are missing
+   */
+  public parseTradeEvents(): ChartEvents[] {
+    if (!this.data || this.data.length === 0) {
+      throw new Error("No data available to parse. Ensure CSV was loaded correctly.");
+    }
+    const requiredColumns = ['time', 'event'];
+    this._validateColumns(requiredColumns);
+
+    return this.data
+      .map((row: CsvRow):  ChartEvents=> ({
+        time: this._normalizeTime(row.time),
+        events: row.event.split(';'),
+      }));
+  }
+
+  /**
+   * Parses line data from the stored CSV data.
+   * Requires 'time' and the column specified by `requiredColumn` to be present in the CSV header.
+   * Time is normalized to a UTCTimestamp (seconds since epoch).
+   * @param requiredColumn - The header name of the column containing the numerical data for the line series.
+   * @returns An array of LineData or WhitespaceData objects, each with a normalized time and a parsed value.
+   * @throws {Error} If required columns are missing in the CSV header or if data hasn't been parsed yet.
+   */
+  public parseLineData(requiredColumn: string): (LineData | WhitespaceData)[] {
+    if (!this.data || this.data.length === 0) {
+      throw new Error("No data available to parse. Ensure CSV was loaded correctly.");
+    }
+    const requiredColumns = ['time', requiredColumn];
+    this._validateColumns(requiredColumns);
+
+    const datas = []
+    for (const row of this.data) {
+      const time = this._normalizeTime(row.time)
+      const value = parseFloat(row[requiredColumn])
+      const data = !isNaN(value) ? {time, value} : {time}
+      datas.push(data);
+    }
+
+    return datas;
+  }
+
+  /**
+   * Parses histogram data from the stored CSV data.
+   * Requires 'time' and the column specified by `requiredColumn` to be present in the CSV header.
+   * Time is normalized to a UTCTimestamp (seconds since epoch).
+   * Rows with unparseable time or volume are filtered out.
+   * @returns An array of HistogramData or WhitespaceData objects, each with a normalized time and a parsed value.
+   * @throws {Error} If required columns are missing in the CSV header or if data hasn't been parsed yet.
+   */
+  public parseHistogramData(requiredColumn: string): (HistogramData | WhitespaceData)[] {
+    if (!this.data || this.data.length === 0) {
+      throw new Error("No data available to parse. Ensure CSV was loaded correctly.");
+    }
+    const requiredColumns = ['time', requiredColumn];
+    this._validateColumns(requiredColumns);
+
+    const datas = []
+    for (const row of this.data) {
+      const time = this._normalizeTime(row.time)
+      const value = parseFloat(row[requiredColumn])
+      const data = !isNaN(value) ? {time, value} : {time}
+      datas.push(data);
+    }
+    
+    return datas;
+  }
+
+  /**
+   * Parses candlestick data from the stored CSV data.
+   * Required columns: 'time', 'open', 'high', 'low', 'close'.
+   * Time is normalized to a UTCTimestamp (seconds since epoch).
+   * Rows with unparseable time are filtered out.
+   * @returns An array of CandlestickData or  or WhitespaceData.
+   * @throws {Error} If required columns are missing in the CSV header or if data hasn't been parsed yet.
+   */
+  public parseCandlestickData(): (CandlestickData | WhitespaceData)[] {
+    if (!this.data || this.data.length === 0) {
+      // Handle case where constructor might have failed or CSV was empty after header
+      throw new Error("No data available to parse. Ensure CSV was loaded correctly.");
+    }
+    const requiredColumns = ['time', 'open', 'high', 'low', 'close'];
+    this._validateColumns(requiredColumns);
+
+    const datas = []
+    for (const row of this.data) {
+      const time = this._normalizeTime(row.time)
+      const open = parseFloat(row.open)
+      const high = parseFloat(row.high)
+      const low = parseFloat(row.low)
+      const close = parseFloat(row.close)
+
+      const allOhlcPresent = !(isNaN(open) || isNaN(high) || isNaN(low) || isNaN(close))
+      const data = allOhlcPresent ? {time, open, high, low, close} : {time}
+
+      datas.push(data);
+    }
+
+    return datas;
+  }
+}
+
+export default CSVParser;

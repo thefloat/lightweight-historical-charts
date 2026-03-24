@@ -67,5 +67,7 @@ Asterisks (*) indicate required columns.
 | Average True Range (ATR)               | atr           |
 | Kaufman Adaptive Moving Average (KAMA) | kama          |
 
-
+\* Datetime is expected to be either:
+   * A date string (e.g., "YYYY-MM-DDTHH:mm:ssZ", "YYYY-MM-DD") or
+   * A Unix timestamp in seconds (as a string)
 

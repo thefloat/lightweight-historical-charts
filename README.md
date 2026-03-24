@@ -46,24 +46,25 @@ There's an example CSV [here](public/data/BTCUSDT_4-11-2026_to_6-11-2026_5m.csv)
 
 ## List of supported series (Indicators)
 Asterisks (*) indicate required columns.
-| Indicator/Group                        | Series    |
-|----------------------------------------|-----------|
-| Datetime                               | *time     |
-| Candlestick                            | open      |
-|                                        | high      |
-|                                        | low       |
-|                                        | close     |
-| Volume                                 | volume    |
-| Bollinger Bands                        | bb_upper  |
-|                                        | bb_middle |
-|                                        | bb_lower  |
-| Donchian Channel                       | dc_upper  |
-|                                        | dc_middle |
-|                                        | dc_lower  |
-| adx                                    | adx       |
-|                                        | plusDi    |
-|                                        | minusDi   |
-| Kaufman Efficiency Ratio               | er        |
-| Average True Range (ATR)               | atr       |
-| Kaufman Adaptive Moving Average (KAMA) | kama      |
+| Indicator/Group                        | Column/Series |
+|----------------------------------------|---------------|
+| Datetime                               | *time         |
+| Candlestick                            | open          |
+|                                        | high          |
+|                                        | low           |
+|                                        | close         |
+| Volume                                 | volume        |
+| Bollinger Bands                        | bb_upper      |
+|                                        | bb_middle     |
+|                                        | bb_lower      |
+| Donchian Channel                       | dc_upper      |
+|                                        | dc_middle     |
+|                                        | dc_lower      |
+| adx                                    | adx           |
+|                                        | plusDi        |
+|                                        | minusDi       |
+| Kaufman Efficiency Ratio               | er            |
+| Average True Range (ATR)               | atr           |
+| Kaufman Adaptive Moving Average (KAMA) | kama          |
+
 

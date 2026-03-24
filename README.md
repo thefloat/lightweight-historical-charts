@@ -60,11 +60,12 @@ Asterisks (*) indicate required columns.
 | Donchian Channel                       | dc_upper      |
 |                                        | dc_middle     |
 |                                        | dc_lower      |
-| adx                                    | adx           |
+| Average Directional Index (ADX)        | adx           |
 |                                        | plusDi        |
 |                                        | minusDi       |
 | Kaufman Efficiency Ratio               | er            |
 | Average True Range (ATR)               | atr           |
 | Kaufman Adaptive Moving Average (KAMA) | kama          |
+
 
 
